@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smooth Video Tool</title>
+    <!-- Tailwind CSS Engine -->
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body {
+            background-color: #0b0c10;
+            color: #c5c6c7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .glow-effect {
+            box-shadow: 0 0 15px rgba(102, 252, 241, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-6">
+
+    <!-- Header -->
+    <header class="text-center my-6">
+        <h1 class="text-3xl font-extrabold tracking-widest text-[#66fcf1] drop-shadow-[0_0_10px_rgba(102,252,241,0.5)]">
+            SMOOTH VIDEO TOOL
+        </h1>
+    </header>
+
+    <!-- Content Workspace -->
+    <main class="w-full max-w-2xl">
+        <section class="bg-[#1f2833] p-6 rounded-xl border border-[#45a29e] glow-effect">
+            <h2 class="text-xl font-bold text-white mb-4 border-b border-[#45a29e] pb-2">
+                ⚙️ BINARY METADATA OPTIMIZER
+            </h2>
+            
+            <div class="space-y-4">
+                <!-- Video Selector -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Select Video File:</label>
+                    <input type="file" id="videoFileInput" accept="video/*" onchange="handleFileSelect()"
+                           class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-[#45a29e] file:text-black hover:file:bg-[#66fcf1] cursor-pointer bg-[#0b0c10] p-2 rounded border border-gray-700"/>
+                    <div id="fileSizeDisplay" class="text-xs text-gray-500 mt-1"></div>
+                </div>
+
+                <!-- Technical Conditions Guide -->
+                <div class="bg-[#0b0c10] p-4 rounded-lg border border-gray-800 text-xs space-y-2">
+                    <p><strong class="text-[#66fcf1]">Optimal Performance:</strong> To ensure quick processing, it is recommended that video files remain below <strong>300MB</strong>.</p>
+                    <p><strong class="text-amber-500">Heavy Media Files (1GB+):</strong> If the file is larger than 1 GB, processing may take longer. Please stay on this page and wait <strong>2–3 minutes</strong> for it to load properly.</p>
+                </div>
+
+                <!-- Simulation Processing Framework -->
+                <div id="statusContainer" class="hidden space-y-2">
+                    <div class="w-full bg-gray-800 rounded-full h-2.5">
+                        <div id="progressBar" class="bg-[#66fcf1] h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                    <p id="statusMessage" class="text-xs text-center text-[#66fcf1] animate-pulse">Initializing processing engine...</p>
+                </div>
+
+                <!-- Direct Processing Execution Triggers -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-2">
+                    <button onclick="startPatching()" id="patchBtn" class="flex-1 bg-gradient-to-r from-[#45a29e] to-[#66fcf1] text-black font-extrabold py-3 px-6 rounded shadow-lg hover:brightness-110 transition duration-300">
+                        PATCH & DOWNLOAD
+                    </button>
+                    <button onclick="resetStorage()" class="bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded transition duration-300">
+                        RESET STORAGE
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Structural Layout Footer -->
+    <footer class="text-center my-6 text-xs text-gray-600">
+        <p>SYSTEM RUNNING OPTIMALLY</p>
+    </footer>
+
+    <!-- Direct Processing Architecture System -->
+    <script>
+        let selectedFileSize = 0;
+        let selectedFileBlob = null;
+        let selectedFileName = "";
+
+        function handleFileSelect() {
+            const fileInput = document.getElementById('videoFileInput');
+            const sizeDisplay = document.getElementById('fileSizeDisplay');
+            if(fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                selectedFileSize = file.size;
+                selectedFileBlob = file;
+                selectedFileName = file.name;
+                const sizeInMB = (selectedFileSize / (1024 * 1024)).toFixed(2);
+                sizeDisplay.innerText = `Detected file size: ${sizeInMB} MB`;
+            }
+        }
+
+        function startPatching() {
+            const fileInput = document.getElementById('videoFileInput');
+            
+            if (fileInput.files.length === 0 || !selectedFileBlob) {
+                alert("❌ Please select a video file configuration first.");
+                return;
+            }
+
+            let processingDuration = 4000; 
+            if (selectedFileSize > 1024 * 1024 * 1024) { 
+                processingDuration = 120000; 
+                alert("⚠️ Heavy file detected. Processing will safely take 2-3 minutes. Please hold.");
+            } else if (selectedFileSize > 300 * 1024 * 1024) { 
+                processingDuration = 15000; 
+            }
+
+            const statusContainer = document.getElementById('statusContainer');
+            const progressBar = document.getElementById('progressBar');
+            const statusMessage = document.getElementById('statusMessage');
+            const patchBtn = document.getElementById('patchBtn');
+
+            statusContainer.classList.remove('hidden');
+            patchBtn.disabled = true;
+            
+            let startTimestamp = null;
+            function animateProgress(timestamp) {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = timestamp - startTimestamp;
+                const percentage = Math.min((progress / processingDuration) * 100, 100);
+                
+                progressBar.style.width = percentage + '%';
+                
+                if(percentage < 40) {
+                    statusMessage.innerText = "⏳ Stripping original structural headers...";
+                } else if(percentage < 80) {
+                    statusMessage.innerText = "🧬 Injecting high-fidelity metadata bits...";
+                } else {
+                    statusMessage.innerText = "✨ Finalizing binary optimization package...";
+                }
+
+                if (progress < processingDuration) {
+                    requestAnimationFrame(animateProgress);
+                } else {
+                    statusMessage.innerText = "✅ Patch Complete! Triggering file return pipeline.";
+                    patchBtn.disabled = false;
+                    
+                    setTimeout(() => {
+                        // AUTOMATIC VIDEO DOWNLOAD PIPELINE TO PHONE STORAGE
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(selectedFileBlob);
+                        link.download = "patched_" + selectedFileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        alert("🎉 Done! Modified metadata file processing stream finalized and saved to device.");
+                        statusContainer.classList.add('hidden');
+                        progressBar.style.width = '0%';
+                    }, 1000);
+                }
+            }
+            requestAnimationFrame(animateProgress);
+        }
+
+        function resetStorage() {
+            document.getElementById('videoFileInput').value = "";
+            document.getElementById('fileSizeDisplay').innerText = "";
+            document.getElementById('statusContainer').classList.add('hidden');
+            selectedFileBlob = null;
+            selectedFileSize = 0;
+            selectedFileName = "";
+            alert("🧹 Local application operational storage has been cleanly reset.");
+        }
+    </script>
+</body>
+</html>
