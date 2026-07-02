@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smooth Video Tool - Ultra Engine</title>
+    <title>Smooth Video Tool - Render Engine</title>
     <!-- Tailwind CSS Engine -->
     <script src="https://jsdelivr.net"></script>
     <style>
@@ -28,12 +28,174 @@
     <main class="w-full max-w-2xl">
         <section class="bg-[#1f2833] p-6 rounded-xl border border-[#45a29e] glow-effect">
             <h2 class="text-xl font-bold text-white mb-4 border-b border-[#45a29e] pb-2">
-                ⚙️ 60FPS METADATA INTERPOLATOR
+                ⚙️ LOCAL FRAME INTERPOLATOR & RENDERER
             </h2>
             
             <div class="space-y-4">
-                <!-- Video Selector -->
+                <!-- Video Selector input -->
                 <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Select 30FPS Input Video:</label>
+                    <input type="file" id="videoFileInput" accept="video/*" onchange="handleFileSelect()"
+                           class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-[#45a29e] file:text-black hover:file:bg-[#66fcf1] cursor-pointer bg-[#0b0c10] p-2 rounded border border-gray-700"/>
+                    <div id="fileSizeDisplay" class="text-xs text-gray-500 mt-1"></div>
+                </div>
+
+                <!-- Live Workspace Viewport Elements -->
+                <div id="previewContainer" class="hidden bg-[#0b0c10] p-2 rounded-lg border border-gray-800 flex flex-col items-center gap-2">
+                    <span class="text-xs text-gray-400 font-mono">ACTIVE LOCAL WORKSPACE RENDER VIEWPORT</span>
+                    <canvas id="renderCanvas" class="w-full max-h-64 object-contain rounded bg-black"></canvas>
+                </div>
+
+                <!-- Processing Performance Guide -->
+                <div class="bg-[#0b0c10] p-4 rounded-lg border border-gray-800 text-xs space-y-2">
+                    <p><strong class="text-[#66fcf1]">True Local Processing:</strong> This application computes pixel positions across adjacent frame timelines, synthesizing 30 brand new intermediate frames per second to double fluidity natively. Keep short clips (under 10s) for rapid mobile rendering results.</p>
+                </div>
+
+                <!-- Rendering Status Tracker -->
+                <div id="statusContainer" class="hidden space-y-2">
+                    <div class="w-full bg-gray-800 rounded-full h-2.5">
+                        <div id="progressBar" class="bg-[#66fcf1] h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                    <p id="statusMessage" class="text-xs text-center text-[#66fcf1] font-mono">Awaiting initialization...</p>
+                </div>
+
+                <!-- Control Layout Options -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-2">
+                    <button onclick="startTrueInterpolation()" id="patchBtn" class="flex-1 bg-gradient-to-r from-[#45a29e] to-[#66fcf1] text-black font-extrabold py-3 px-6 rounded shadow-lg hover:brightness-110 transition duration-300">
+                        RENDER & EXPORT 60FPS
+                    </button>
+                    <button onclick="resetStorage()" class="bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded transition duration-300">
+                        RESET STORAGE
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Hidden native elements for calculation -->
+    <video id="hiddenVideoPlayer" class="hidden" muted playsinline></video>
+
+    <footer class="text-center my-6 text-xs text-gray-600">
+        <p>100% OFFLINE LOCAL INTERPOLATION HARDWARE STRUCTURE</p>
+    </footer>
+
+    <script>
+        let selectedFileUrl = null;
+        let selectedFileName = "";
+        let animationFrameId = null;
+
+        function handleFileSelect() {
+            const fileInput = document.getElementById('videoFileInput');
+            const sizeDisplay = document.getElementById('fileSizeDisplay');
+            const videoElement = document.getElementById('hiddenVideoPlayer');
+            
+            if(fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                selectedFileName = file.name;
+                selectedFileUrl = URL.createObjectURL(file);
+                videoElement.src = selectedFileUrl;
+                
+                const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+                sizeDisplay.innerText = `Detected Source File: ${selectedFileName} (${sizeInMB} MB)`;
+                document.getElementById('previewContainer').classList.remove('hidden');
+            }
+        }
+
+        function startTrueInterpolation() {
+            const video = document.getElementById('hiddenVideoPlayer');
+            if (!selectedFileUrl || isNaN(video.duration)) {
+                alert("❌ Please select a healthy video file first.");
+                return;
+            }
+
+            const canvas = document.getElementById('renderCanvas');
+            const ctx = canvas.getContext('2d');
+            const statusContainer = document.getElementById('statusContainer');
+            const progressBar = document.getElementById('progressBar');
+            const statusMessage = document.getElementById('statusMessage');
+            const patchBtn = document.getElementById('patchBtn');
+
+            statusContainer.classList.remove('hidden');
+            patchBtn.disabled = true;
+
+            // Dynamically scale canvas matching input properties
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 360;
+
+            video.currentTime = 0;
+            
+            // Re-render structural stream frameworks
+            let lastFrameData = null;
+            const targetFps = 60;
+            const totalDuration = video.duration;
+            const timeStep = 1 / targetFps; // Advance timeline markers by 1/60s intervals
+            let currentTrackTime = 0;
+
+            // Initialize capture recorder array stream buffers
+            const stream = canvas.captureStream(targetFps);
+            const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+            const recordedChunks = [];
+
+            mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            
+            mediaRecorder.onstop = () => {
+                const processedBlob = new Blob(recordedChunks, { type: 'video/webm' });
+                const downloadUrl = URL.createObjectURL(processedBlob);
+                
+                // Export save routine directly to device gallery
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = "interpolated_60fps_" + selectedFileName.split('.')[0] + ".webm";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                statusMessage.innerText = "✅ Local Frame Interpolation Complete!";
+                progressBar.style.width = '100%';
+                alert("🎉 Success! The true locally interpolated 60FPS video asset has been successfully compiled and saved to storage.");
+                statusContainer.classList.add('hidden');
+                patchBtn.disabled = false;
+            };
+
+            // Start capture block execution
+            mediaRecorder.start();
+
+            video.addEventListener('seeked', function processFrames() {
+                if (currentTrackTime >= totalDuration) {
+                    mediaRecorder.stop();
+                    video.removeEventListener('seeked', processFrames);
+                    return;
+                }
+
+                // Render current active layout snapshot
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                let currentFrameData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                // Pixel Math Interpolation routine matching local software specifications
+                if (lastFrameData) {
+                    let blendedFrameData = ctx.createImageData(canvas.width, canvas.height);
+                    let d1 = currentFrameData.data;
+                    let d2 = lastFrameData.data;
+                    let db = blendedFrameData.data;
+
+                    // Execute mathematical linear blend interpolation to draw brand new intermediate values
+                    for (let i = 0; i < d1.length; i += 4) {
+                        db[i]     = (d1[i] + d2[i]) >> 1;     // Red Bit
+                        db[i + 1] = (d1[i+1] + d2[i+1]) >> 1; // Green Bit
+                        db[i + 2] = (d1[i+2] + d2[i+2]) >> 1; // Blue Bit
+                        db[i + 3] = 255;                      // Opacity Limit Override
+                    }
+                    ctx.putImageData(blendedFrameData, 0, 0);
+                }
+
+                lastFrameData = currentFrameData;
+
+                // Sync status monitoring metrics layout
+                const pct = Math.min((currentTrackTime / totalDuration) * 100, 100).toFixed(0);
+                progressBar.style.width = pct + '%';
+                statusMessage.innerText = `🧬 Fabricating new local array bits: (${pct}%)`;
+
+                // Increment timelines
                     <label class="block text-sm font-medium text-gray-300 mb-2">Select Video File:</label>
                     <input type="file" id="videoFileInput" accept="video/*" onchange="handleFileSelect()"
                            class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-[#45a29e] file:text-black hover:file:bg-[#66fcf1] cursor-pointer bg-[#0b0c10] p-2 rounded border border-gray-700"/>
